@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Map of Norway</title>
+    <!-- Include CesiumJS library -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.87/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.87/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        /* Ensure the map fills the entire viewport */
+        #cesiumContainer {
+            width: 100%;
+            height: 100vh; /* Full screen height */
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+    <script>
+        // Initialize CesiumJS Viewer
+        const viewer = new Cesium.Viewer('cesiumContainer', {
+            imageryProvider: new Cesium.OpenStreetMapImageryProvider({
+                url: 'https://a.tile.openstreetmap.org/'
+            }),
+            terrainProvider: Cesium.createWorldTerrain(),
+            sceneMode: Cesium.SceneMode.SCENE3D,
+            selectionIndicator: false, // Disable the selection indicator
+            baseLayerPicker: false // Disable base layer picker
+        });
+
+        // Set the initial camera position over Norway
+        viewer.camera.setView({
+            destination: Cesium.Cartesian3.fromDegrees(11.5280, 64.5731, 1500000), // Coordinates for central Norway (lat, lon, altitude)
+            orientation: {
+                heading: Cesium.Math.toRadians(0),
+                pitch: Cesium.Math.toRadians(-30), // Tilt for 3D effect
+                roll: 0
+            }
+        });
+
+        // Zoom constraints to limit the zoom area to Norway only
+        const minZoom = 1000000; // Minimum zoom level (close to Norway's terrain)
+        const maxZoom = 2000000; // Maximum zoom level (more zoomed out view of Norway)
+
+        viewer.scene.camera.changed.addEventListener(function () {
+            // Clamp the zoom level to the bounds defined
+            const cameraHeight = viewer.scene.camera.positionCartographic.height;
+            if (cameraHeight < minZoom) {
+                viewer.scene.camera.positionCartographic.height = minZoom;
+            } else if (cameraHeight > maxZoom) {
+                viewer.scene.camera.positionCartographic.height = maxZoom;
+            }
+        });
+    </script>
+</body>
+</html>
